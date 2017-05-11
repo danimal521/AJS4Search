@@ -5,9 +5,9 @@
         <td><b>Price</b></td>
     </tr>
     <tr>
-        <td><input type="text" [(ngModel)]=NameFilter/></td>
-        <td><input type="text" [(ngModel)]=MakeFilter/></td>
-        <td><input type="text"  [(ngModel)]=PriceFilter/></td>
+        <td><input type="text" (ngModelChange)="FilterChange()" [(ngModel)]=NameFilter/></td>
+        <td><input type="text" (ngModelChange)="FilterChange()" [(ngModel)]=MakeFilter/></td>
+        <td></td>
     </tr>
     <tr *ngFor="let bike of m_Model.Bikes|mainpipe:NameFilter:MakeFilter:PriceFilter:SortCol:SortOrder:CurrentPage:this">
         <td>{{bike.Name}}</td>

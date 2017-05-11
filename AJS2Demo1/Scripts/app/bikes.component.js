@@ -1,4 +1,6 @@
 ﻿(function (app) {
+    var m_vPages = 4;
+
     app.BikesComponent =
         ng.core.Component({
             selector: 'bikes',
@@ -8,6 +10,8 @@
             .Class({
                 constructor: [ng.http.Http, function (http) {
                     this.http = http;
+                    this.SortCol = "Name";
+                    this.SortOrder = "ASC";
 
                     this.Pages = [1,2,3,4];
 
@@ -24,10 +28,7 @@
                     return this.http.get('home/GetBikes').map(function (res) {
                         return res.json();
                     });
-                },
-                RemoveSpaces: function (value) {
-                    alert(value);
-                },
+                },               
                 AddBike: function () {
                     this.m_Model.Bikes.push({
                         "Name": "",
@@ -62,7 +63,7 @@
                 PageClick: function (Page) {
                     this.CurrentPage = Page;
                 },
-                PageUpdate(Length) {
+                PageUpdate: function (Length) {
                     this.Pages = [];
                     var nCount = 1;
                     var nTotal = Length / 4;
@@ -70,6 +71,9 @@
                         this.Pages.push(nCount);
                         nCount++;
                     }
+                },
+                FilterChange: function () {
+                    this.CurrentPage = 0;
                 }
             });
 
@@ -83,52 +87,52 @@
                     
                 }],
                 transform: function (items, name, make, price, sortcol, sortorder, page, com) {
-                    //console.log(sortcol + " " + sortorder);
-                    
+                    //console.log(name + " " + sortorder);
+
                     if (items && items.length)
                     {
                         //Build return
-                        var v = items.filter(item => {
-                            if (name && item.Name.toLowerCase().indexOf(name.toLowerCase()) === -1) {
-                                return false;
-                            }
-                            if (make && item.Make.toLowerCase().indexOf(make.toLowerCase()) === -1) {
-                                return false;
-                            }
+                        var vReturn = [];
+                        var bAdd = true;
 
-                            return true;
-                        });
+                        for (var i = 0; i < items.length; i++) {
 
+                            if (name && items[i].Name.toLowerCase().indexOf(name.toLowerCase()) === -1) {
+                                bAdd = false;
+                            }
+                            if (make && items[i].Make.toLowerCase().indexOf(make.toLowerCase()) === -1) {
+                                bAdd =  false;
+                            }
+                            
+                            if (bAdd)
+                                vReturn.push(items[i]);
+
+                            bAdd = true;
+                        }
+                        
                         if (!page) {
                             page = 0;
                         }
 
-                        page = page * 4;
+                        page = page * m_vPages;
                         var nStart = page;
-                        var sEnd = page + 4;
+                        var sEnd = page + m_vPages;
 
-                        com.PageUpdate(v.length);
-  
+                        com.PageUpdate(vReturn.length);
+
                         //Sort
-                        if (!sortcol) {
-                            return v.sort(v => v.Name).slice(nStart, sEnd);
-                        }                        
-
                         if (sortcol == "Name" && sortorder == "ASC")
-                            return v.sort(v => v.Name).slice(nStart, sEnd);
+                            return vReturn.sort(function (a, b) { if (a.Name < b.Name) return -1; if (a.Name > b.Name) return 1; return 0; }).slice(nStart, sEnd);
                         else if (sortcol == "Name" && sortorder == "DESC")
-                        return v.sort(v => v.Name).reverse().slice(nStart, sEnd);
+                            return vReturn.sort(function (a, b) { if (a.Name < b.Name) return -1; if (a.Name > b.Name) return 1; return 0; }).reverse().slice(nStart, sEnd);
                         else if (sortcol == "Make" && sortorder == "ASC")
-                            return v.sort(v => v.Make).slice(nStart, sEnd);
+                            return vReturn.sort(function (a, b) { if (a.Make < b.Make) return -1; if (a.Make > b.Make) return 1; return 0; }).slice(nStart, sEnd);
                         else if (sortcol == "Make" && sortorder == "DESC")
-                            return v.sort(v => v.Make).reverse().slice(nStart, sEnd);
-                    }
-                    else
-                    {
-                        return items;
+                            return vReturn.sort(function (a, b) { if (a.Make < b.Make) return -1; if (a.Make > b.Make) return 1; return 0; }).reverse().slice(nStart, sEnd);
                     }
                 }
             });
+
 
 })(window.app || (window.app = {}));
 
